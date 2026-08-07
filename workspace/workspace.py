@@ -8,6 +8,8 @@ class Workspace(QWidget):
 
         self.canvas = QPixmap(800, 600)
         self.canvas.fill(Qt.white)
+
+        self.last_pos = None
         
 
     def mousePressEvent(self, event):
@@ -25,3 +27,6 @@ class Workspace(QWidget):
         x1, y1 = cursor.pos()
         
         painter.drawLine(x1, y1)
+
+    def mouseReleaseEvent(self, event):
+        self.last_pos = None
