@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor
 from PySide6.QtCore import Qt
 
@@ -6,20 +6,36 @@ class Workspace(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.canvas = QPixmap(800, 600)
+        # get screen measurements
+        self.actual_screen = QApplication.primaryScreen()
+        #  use availableGeometry due to bug
+        geo = self.actual_screen.availableGeometry()
+
+        # reuse to resize canvas
+        self.canvas = QPixmap(geo.width(), geo.height())
         self.canvas.fill(Qt.GlobalColor.white)
 
+        # set mouse last_pos to None while nothing happens
         self.last_pos = None
         
 
+        # change upon mouse click
     def mousePressEvent(self, event):
         self.last_pos = event.position()
 
+        # on moveing mouse
     def mouseMoveEvent(self, event):
+
+        # if mouse clicked/pressed --> logic -->
         if self.last_pos is not None:
-            current_pos = event.position()        
+            # get mouse current position/coords
+            current_pos = event.position()
+
+            # paint on canvas
             painter = QPainter(self.canvas)
             painter.setPen(QPen(QColor("black"), 3))
+
+            # drawLine(x1,y1,x2,y2) --> ((x1, y1),(x2, y2))
             painter.drawLine(self.last_pos, current_pos)
             painter.end()
 
