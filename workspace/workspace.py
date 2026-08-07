@@ -7,7 +7,7 @@ class Workspace(QWidget):
         super().__init__()
 
         self.canvas = QPixmap(800, 600)
-        self.canvas.fill(Qt.white)
+        self.canvas.fill(Qt.GlobalColor.white)
 
         self.last_pos = None
         
@@ -16,17 +16,18 @@ class Workspace(QWidget):
         self.last_pos = event.position()
 
     def mouseMoveEvent(self, event):
-        pass
-
-    def mouseMoveEvent(self, event):
-        cursor = QCursor()
-        
-        self.painter = QPainter(self.canvas)
+        current_pos = event.position()        
+        painter = QPainter(self.canvas)
         painter.setPen(QPen(QColor("black"), 3))
-        
-        x1, y1 = cursor.pos()
-        
-        painter.drawLine(x1, y1)
+        painter.drawLine(self.last_pos, current_pos)
+        painter.end()
+
+        self.last_pos = current_pos
+        self.update()
 
     def mouseReleaseEvent(self, event):
         self.last_pos = None
+
+    # def paintEvent(self, event):
+    #     painter = QPainter(self)
+    #     painter.drawPixmap(0, 0, self.canvas)
