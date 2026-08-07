@@ -28,6 +28,6 @@ class Workspace(QWidget):
     def mouseReleaseEvent(self, event):
         self.last_pos = None
 
-    # def paintEvent(self, event):
-    #     painter = QPainter(self)
-    #     painter.drawPixmap(0, 0, self.canvas)
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.drawPixmap(0, 0, self.canvas)
