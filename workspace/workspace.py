@@ -25,7 +25,8 @@ class Workspace(QWidget):
 
     # change upon mouse click
     def mousePressEvent(self, event):
-        self.last_pos = event.position()
+        self.last_raw = event.position()
+        self.last_mid = event.position()
 
     # on moveing mouse
     def mouseMoveEvent(self, event):
