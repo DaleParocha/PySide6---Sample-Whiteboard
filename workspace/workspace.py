@@ -19,11 +19,11 @@ class Workspace(QWidget):
         self.last_pos = None
         
 
-        # change upon mouse click
+    # change upon mouse click
     def mousePressEvent(self, event):
         self.last_pos = event.position()
 
-        # on moveing mouse
+    # on moveing mouse
     def mouseMoveEvent(self, event):
 
         # if mouse clicked/pressed --> logic -->
@@ -44,11 +44,11 @@ class Workspace(QWidget):
             # update every Move event if last_pos != None
             self.update()
 
-# on release of mouse press return mouse last_pos to None
+    # on release of mouse press return mouse last_pos to None
     def mouseReleaseEvent(self, event):
         self.last_pos = None
 
-# start painting
+    # start painting
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self.canvas)
