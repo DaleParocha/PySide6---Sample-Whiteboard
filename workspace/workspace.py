@@ -52,7 +52,3 @@ class Workspace(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self.canvas)
-
-class ToolOverlay(QWidget):
-    def __init__(self):
-        pass
