@@ -69,7 +69,8 @@ class Workspace(QWidget):
 
     # on release of mouse press return mouse last_pos to None
     def mouseReleaseEvent(self, event):
-        self.last_pos = None
+        self.last_raw = None
+        self.last_mid = None
 
     # start painting
     def paintEvent(self, event):
