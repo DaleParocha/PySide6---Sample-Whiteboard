@@ -38,7 +38,12 @@ class Workspace(QWidget):
 
             # paint on canvas
             painter = QPainter(self.canvas)
-            painter.setPen(QPen(QColor("black"), 3))
+
+            if self.current_tool == "Eraser":
+                painter.setPen(QPen(QColor("white"), 20))
+
+            else:
+                painter.setPen(QPen(QColor("black"), 3))
 
             # drawLine(x1,y1,x2,y2) --> ((x1, y1),(x2, y2))
             painter.drawLine(self.last_pos, current_pos)
@@ -57,3 +62,6 @@ class Workspace(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self.canvas)
+
+    def set_current_tool(self, tool_name):
+        self.current_tool = tool_name
