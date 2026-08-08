@@ -25,7 +25,7 @@ class Workspace(QWidget):
 
     # change upon mouse click
     def mousePressEvent(self, event):
-        self.last_raw = event.position()
+        self.last_pos = event.position()
         self.last_mid = event.position()
 
     # on moveing mouse
@@ -37,7 +37,9 @@ class Workspace(QWidget):
             current_pos = event.position()
 
             path = QPainterPath()
-            path.moveTo(self.last_pos)
+            path.moveTo(self.last_mid)          # start exactly where the last segment ended
+            path.quadTo(self.last_raw, mid)      # curve toward mid, using last raw point as control)
+
             mid = (self.last_pos + current_pos) / 2
             path.quadTo(self.last_pos, mid)
 
@@ -69,7 +71,7 @@ class Workspace(QWidget):
 
     # on release of mouse press return mouse last_pos to None
     def mouseReleaseEvent(self, event):
-        self.last_raw = None
+        self.last_pos = None
         self.last_mid = None
 
     # start painting
