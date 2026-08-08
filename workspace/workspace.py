@@ -18,7 +18,6 @@ class Workspace(QWidget):
         self.canvas.fill(Qt.GlobalColor.white)
 
         self.tool_overlay = ToolOverlay(self)
-        self.tool_overlay.move(20, 20)
 
         # set mouse last_pos to None while nothing happens
         self.last_pos = None
