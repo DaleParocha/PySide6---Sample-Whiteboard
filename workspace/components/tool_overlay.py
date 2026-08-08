@@ -6,7 +6,7 @@ class ToolOverlay(QWidget):
         super().__init__(parent)
 
         self.setStyleSheet("""
-            background-color: rgba(255, 255, 255, 160);
+            background-color: rgba(250, 4, 199, 160);
             border: 1px solid rgba(0, 0, 0, 60);
             border-radius: 8px;
         """)
