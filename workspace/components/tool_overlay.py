@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup
+from PySide6.QtCore import QEvent
 
 class ToolOverlay(QWidget):
     def __init__(self, parent):
@@ -29,6 +30,10 @@ class ToolOverlay(QWidget):
             self.tool_group.addButton(btn)
 
         parent.set_current_tool(tools[0])
+
+        parent.installEventFilter(self)
+        self.adjustSize()
+        self.position_overlay()
 
     def position_overlay(self):
         margin = 20
