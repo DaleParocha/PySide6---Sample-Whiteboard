@@ -1,6 +1,8 @@
-from PySide6.QtWidgets import QWidget, QApplication, QHboxLayout, QPushButton, QButtonGroup
+from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor
 from PySide6.QtCore import Qt
+
+from workspace.components.tool_overlay import ToolOverlay
 
 class Workspace(QWidget):
     def __init__(self):
@@ -14,6 +16,9 @@ class Workspace(QWidget):
         # reuse to resize canvas
         self.canvas = QPixmap(geo.width(), geo.height())
         self.canvas.fill(Qt.GlobalColor.white)
+
+        self.tool_overlay = ToolOverlay(self)
+        self.tool_overlay.move(20, 20)
 
         # set mouse last_pos to None while nothing happens
         self.last_pos = None
