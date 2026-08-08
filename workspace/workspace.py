@@ -35,17 +35,30 @@ class Workspace(QWidget):
             # get mouse current position/coords
             current_pos = event.position()
 
+            path = QPainterPath()
+            path.moveTo(self.last_pos)
+            mid = (self.last_pos + current_pos) / 2
+            path.quadTo(self.last_pos, mid)
+
+
             # paint on canvas
             painter = QPainter(self.canvas)
+
+            # smoothener
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
             if self.current_tool == "Eraser":
                 painter.setPen(QPen(QColor("white"), 20))
 
             else:
-                painter.setPen(QPen(QColor("black"), 3))
+                # customizing pen
+                pen = QPen(QColor("black"), 3)
+                pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+                pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+                painter.setPen(pen)
 
             # drawLine(x1,y1,x2,y2) --> ((x1, y1),(x2, y2))
-            painter.drawLine(self.last_pos, current_pos)
+            painter.drawPath(path)
             painter.end()
 
             self.last_pos = current_pos
