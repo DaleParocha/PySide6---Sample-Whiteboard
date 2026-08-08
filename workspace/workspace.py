@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QApplication
-from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor
+from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor, QPainterPath
 from PySide6.QtCore import Qt
 
 from workspace.components.tool_overlay import ToolOverlay
