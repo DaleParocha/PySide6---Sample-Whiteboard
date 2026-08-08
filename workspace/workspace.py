@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QApplication
+from PySide6.QtWidgets import QWidget, QApplication, QHboxLayout, QPushButton, QButtonGroup
 from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor
 from PySide6.QtCore import Qt
 
@@ -52,3 +52,7 @@ class Workspace(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self.canvas)
+
+class ToolOverlay(QWidget):
+    def __init__(self):
+        pass
