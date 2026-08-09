@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup
-from PySide6.QtCore import QEvent
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup, QSlider, QLabel
+from PySide6.QtCore import QEvent,  Qt
 
 class ToolOverlay(QWidget):
     def __init__(self, parent):
@@ -30,6 +30,17 @@ class ToolOverlay(QWidget):
             self.tool_group.addButton(btn)
 
         parent.set_current_tool(tools[0])
+
+         # --- size control ---
+        self.size_slider = QSlider(Qt.Orientation.Horizontal)
+        self.size_slider.setMinimum(1)
+        self.size_slider.setMaximum(50)
+        self.size_slider.setValue(3)
+        self.size_slider.setFixedWidth(120)
+        self.size_slider.valueChanged.connect(parent.set_pen_size)
+        layout.addWidget(self.size_slider)
+
+        parent.set_pen_size(self.size_slider.value())
 
         parent.installEventFilter(self)
         self.adjustSize()
