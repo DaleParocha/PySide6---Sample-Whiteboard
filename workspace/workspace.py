@@ -64,10 +64,10 @@ class Workspace(QWidget):
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
             if self.current_tool == "Eraser":
-                painter.setPen(QPen(QColor("White"), 20))
+                painter.setPen(QPen(QColor("White"), self.pen_size * 4))
 
             else:
-                pen = QPen(QColor("black"), 3)
+                pen = QPen(QColor("black"), self.pen_size)
                 pen.setCapStyle(Qt.PenCapStyle.RoundCap)
                 pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
                 painter.setPen(pen)
