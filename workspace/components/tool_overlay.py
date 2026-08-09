@@ -2,25 +2,44 @@ from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
     QButtonGroup, QSlider, QLabel
 )
-from PySide6.QtCore import QEvent,  Qt
+from PySide6.QtCore import QEvent, Qt
+
 
 class ToolOverlay(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
         self.setStyleSheet("""
-            background-color: rgba(250, 4, 199, 160);
-            border: 1px solid rgba(0, 0, 0, 60);
-            border-radius: 8px;
+            QWidget#overlayBox {
+                background-color: transparent;
+                border: 1px solid rgba(128, 128, 128, 80);
+                border-radius: 8px;
+            }
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                padding: 4px 10px;
+            }
+            QPushButton:checked {
+                background-color: rgba(128, 128, 128, 80);
+                border-radius: 4px;
+            }
+            QLabel {
+                background-color: transparent;
+                border: none;
+            }
         """)
+        self.setObjectName("overlayBox")
 
-        # outer layout stacks rows top-to-bottom
+        # outer layout stacks the slider row above the button row
         outer_layout = QVBoxLayout(self)
-        outer_layout.setContentsMargins(8, 8, 8, 8)
+        outer_layout.setContentsMargins(12, 8, 12, 8)
         outer_layout.setSpacing(6)
 
-        # size slider 
+        # size slider
         slider_row = QHBoxLayout()
+        slider_row.setSpacing(10)
+
         self.size_label = QLabel("Size: 3")
         slider_row.addWidget(self.size_label)
 
@@ -37,6 +56,7 @@ class ToolOverlay(QWidget):
 
         # tool buttons
         button_row = QHBoxLayout()
+        button_row.setSpacing(14)
 
         self.tool_group = QButtonGroup(self)
         self.tool_group.setExclusive(True)
@@ -45,10 +65,9 @@ class ToolOverlay(QWidget):
         for i, name in enumerate(tools):
             btn = QPushButton(name)
             btn.setCheckable(True)
-
+            btn.setFlat(True)
             if i == 0:
                 btn.setChecked(True)
-
             btn.clicked.connect(lambda checked, t=name: parent.set_current_tool(t))
             button_row.addWidget(btn)
             self.tool_group.addButton(btn)
@@ -56,7 +75,6 @@ class ToolOverlay(QWidget):
         outer_layout.addLayout(button_row)
 
         parent.set_current_tool(tools[0])
-        # size control
         parent.set_pen_size(self.size_slider.value())
 
         parent.installEventFilter(self)
@@ -69,19 +87,15 @@ class ToolOverlay(QWidget):
     def position_overlay(self):
         margin = 20
         parent = self.parentWidget()
-
         if parent is None:
             return
-
         x = (parent.width() - self.width()) // 2
         y = parent.height() - self.height() - margin
-
         self.move(x, y)
 
     def eventFilter(self, watched, event):
         if watched == self.parentWidget() and event.type() == QEvent.Type.Resize:
             self.position_overlay()
-
         return super().eventFilter(watched, event)
 
     def resizeEvent(self, event):
