@@ -30,6 +30,7 @@ class ToolOverlay(QWidget):
             }
         """)
         self.setObjectName("overlayBox")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         # outer layout stacks the slider row above the button row
         outer_layout = QVBoxLayout(self)
