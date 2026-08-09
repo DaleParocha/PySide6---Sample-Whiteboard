@@ -46,46 +46,77 @@ class Workspace(QWidget):
 
     # on moveing mouse
     def mouseMoveEvent(self, event):
+        if len(self.point_buffer) > 0:
+            self.point_buffer.append(event.position())
 
-        # if mouse clicked/pressed --> logic -->
-        if self.last_pos is not None:
-            # get mouse current position/coords
-            current_pos = event.position()
-            mid = (self.last_pos + current_pos) / 2
+            avg_x = sum(p.x() for p in self.point_buffer) / len(self.point_buffer)
+            avg_y = sum(p.y() for p in self.point_buffer) / len(self.point_buffer)
+
+            smoothed_pos = QPointF(avg_x, avg_y)
 
             path = QPainterPath()
-            path.moveTo(self.last_mid)           # start exactly where the last segment ended
-            path.quadTo(self.last_pos, mid)      # curve toward mid, using last raw point as control
+            path.moveTo(self.last_mid)
+            path.lineTo(smoothed_pos)
 
-            # paint on canvas
             painter = QPainter(self.canvas)
-
-            # smoothener
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
             if self.current_tool == "Eraser":
-                painter.setPen(QPen(QColor("white"), 20))
+                painter.setPen(QPen(QColor("White"), 20))
 
             else:
-                # customizing pen
                 pen = QPen(QColor("black"), 3)
                 pen.setCapStyle(Qt.PenCapStyle.RoundCap)
                 pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
                 painter.setPen(pen)
 
-            # drawLine(x1,y1,x2,y2) --> ((x1, y1),(x2, y2))
             painter.drawPath(path)
             painter.end()
 
-            self.last_mid = mid          # next segment starts here
-
-            #  feature?
-            # self.last_raw = current_pos  # next segment's control point
-
-            self.last_pos = current_pos  # next segment's control point
-
-            # update every Move event if last_pos != None
+            self.last_mid = smoothed_pos
             self.update()
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        # # if mouse clicked/pressed --> logic -->
+        # if self.last_pos is not None:
+        #     # get mouse current position/coords
+        #     current_pos = event.position()
+        #     mid = (self.last_pos + current_pos) / 2
+
+        #     path = QPainterPath()
+        #     path.moveTo(self.last_mid)           # start exactly where the last segment ended
+        #     path.quadTo(self.last_pos, mid)      # curve toward mid, using last raw point as control
+
+        #     # paint on canvas
+        #     painter = QPainter(self.canvas)
+
+        #     # smoothener
+        #     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        #     if self.current_tool == "Eraser":
+        #         painter.setPen(QPen(QColor("white"), 20))
+
+        #     else:
+        #         # customizing pen
+        #         pen = QPen(QColor("black"), 3)
+        #         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        #         pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        #         painter.setPen(pen)
+
+        #     # drawLine(x1,y1,x2,y2) --> ((x1, y1),(x2, y2))
+        #     painter.drawPath(path)
+        #     painter.end()
+
+        #     self.last_mid = mid          # next segment starts here
+
+        #     #  feature?
+        #     # self.last_raw = current_pos  # next segment's control point
+
+        #     self.last_pos = current_pos  # next segment's control point
+
+        #     # update every Move event if last_pos != None
+        #     self.update()
 
     # on release of mouse press return mouse last_pos to None
     def mouseReleaseEvent(self, event):
