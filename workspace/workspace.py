@@ -15,6 +15,8 @@ class Workspace(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.pen_size = 3
+
         # get screen measurements
         self.actual_screen = QApplication.primaryScreen()
         #  use availableGeometry due to bug
@@ -196,3 +198,6 @@ class Workspace(QWidget):
 
         painter.end()
         self.update()
+
+    def set_pen_size(self, size):
+        self.pen_size = size
