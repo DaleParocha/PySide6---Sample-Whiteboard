@@ -1,4 +1,7 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QButtonGroup, QSlider, QLabel
+from PySide6.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
+    QButtonGroup, QSlider, QLabel
+)
 from PySide6.QtCore import QEvent,  Qt
 
 class ToolOverlay(QWidget):
@@ -11,8 +14,29 @@ class ToolOverlay(QWidget):
             border-radius: 8px;
         """)
 
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
+        # outer layout stacks rows top-to-bottom
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(8, 8, 8, 8)
+        outer_layout.setSpacing(6)
+
+        # size slider 
+        slider_row = QHBoxLayout()
+        self.size_label = QLabel("Size: 3")
+        slider_row.addWidget(self.size_label)
+
+        self.size_slider = QSlider(Qt.Orientation.Horizontal)
+        self.size_slider.setMinimum(1)
+        self.size_slider.setMaximum(50)
+        self.size_slider.setValue(3)
+        self.size_slider.setFixedWidth(150)
+        self.size_slider.valueChanged.connect(parent.set_pen_size)
+        self.size_slider.valueChanged.connect(self.update_size_label)
+        slider_row.addWidget(self.size_slider)
+
+        outer_layout.addLayout(slider_row)
+
+        # tool buttons
+        button_row = QHBoxLayout()
 
         self.tool_group = QButtonGroup(self)
         self.tool_group.setExclusive(True)
@@ -26,25 +50,21 @@ class ToolOverlay(QWidget):
                 btn.setChecked(True)
 
             btn.clicked.connect(lambda checked, t=name: parent.set_current_tool(t))
-            layout.addWidget(btn)
+            button_row.addWidget(btn)
             self.tool_group.addButton(btn)
 
+        outer_layout.addLayout(button_row)
+
         parent.set_current_tool(tools[0])
-
-         # --- size control ---
-        self.size_slider = QSlider(Qt.Orientation.Horizontal)
-        self.size_slider.setMinimum(1)
-        self.size_slider.setMaximum(50)
-        self.size_slider.setValue(3)
-        self.size_slider.setFixedWidth(120)
-        self.size_slider.valueChanged.connect(parent.set_pen_size)
-        layout.addWidget(self.size_slider)
-
+        # size control
         parent.set_pen_size(self.size_slider.value())
 
         parent.installEventFilter(self)
         self.adjustSize()
         self.position_overlay()
+
+    def update_size_label(self, value):
+        self.size_label.setText(f"Size: {value}")
 
     def position_overlay(self):
         margin = 20
