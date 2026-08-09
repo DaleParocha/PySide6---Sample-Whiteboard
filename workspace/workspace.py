@@ -2,6 +2,10 @@ from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor, QPainterPath, QImage
 from PySide6.QtCore import Qt, QPointF
 
+from collections import deque
+
+from PySide6.QtWidgets import QWidget
+
 import math
 import random
 
@@ -17,7 +21,7 @@ class Workspace(QWidget):
         geo = self.actual_screen.availableGeometry()
 
         # reuse to resize canvas
-        self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
+        self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)        
         self.canvas.fill(Qt.GlobalColor.white)
 
         self.tool_overlay = ToolOverlay(self)
@@ -27,12 +31,18 @@ class Workspace(QWidget):
 
         self.draw_circle(400, 300, 100)
         self.draw_smoothness_test()
-        
+
+        self.point_buffer = deque(maxlen=4)
 
     # change upon mouse click
     def mousePressEvent(self, event):
         self.last_pos = event.position()
         self.last_mid = event.position()
+
+        pos = event.position()
+        self.point_buffer.clear()
+        self.point_buffer.append(pos)
+        self.last_mid = pos
 
     # on moveing mouse
     def mouseMoveEvent(self, event):
