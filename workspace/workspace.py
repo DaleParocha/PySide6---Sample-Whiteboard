@@ -2,6 +2,9 @@ from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor, QPainterPath, QImage
 from PySide6.QtCore import Qt, QPointF
 
+import math
+import random
+
 from workspace.components.tool_overlay import ToolOverlay
 
 class Workspace(QWidget):
@@ -21,6 +24,9 @@ class Workspace(QWidget):
 
         # set mouse last_pos to None while nothing happens
         self.last_pos = None
+
+        self.draw_circle(400, 300, 100)
+        self.draw_smoothness_test()
         
 
     # change upon mouse click
@@ -93,6 +99,59 @@ class Workspace(QWidget):
         painter.setPen(pen)
 
         painter.drawEllipse(QPointF(center_x, center_y), radius, radius)
+
+        painter.end()
+        self.update()
+
+    def draw_smoothness_test(self):
+        painter = QPainter(self.canvas)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        pen = QPen(QColor("black"), 3)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(pen)
+
+        # --- Test 1: shallow diagonal lines ---
+        # Near-horizontal/vertical diagonals show jagged "staircasing" most obviously,
+        # since each pixel step is most visible at low angles.
+        y = 60
+        for angle_deg in [5, 15, 30, 45]:
+            angle = math.radians(angle_deg)
+            length = 300
+            x2 = 60 + length * math.cos(angle)
+            y2 = y + length * math.sin(angle)
+            painter.drawLine(QPointF(60, y), QPointF(x2, y2))
+            y += 60
+
+        # --- Test 2: a perfect circle ---
+        # Circles reveal antialiasing quality clearly, since curvature changes
+        # continuously — any faceting/jaggedness stands out along the arc.
+        painter.drawEllipse(QPointF(500, 150), 90, 90)
+
+        # --- Test 3: simulate a FAST, jagged mouse stroke ---
+        # Random big jumps between points, run through your actual quadTo
+        # smoothing logic — this tests whether fast real strokes will show
+        # gaps or kinks, not just idealized straight/curved shapes.
+        points = [QPointF(random.randint(500, 750), random.randint(300, 500)) for _ in range(8)]
+        last_pos = points[0]
+        last_mid = points[0]
+        for current_pos in points[1:]:
+            mid = (last_pos + current_pos) / 2
+            path = QPainterPath()
+            path.moveTo(last_mid)
+            path.quadTo(last_pos, mid)
+            painter.drawPath(path)
+            last_mid = mid
+            last_pos = current_pos
+
+        # --- Test 4: tightly packed parallel lines ---
+        # Reveals whether thin strokes blur together or stay crisp/distinct
+        # at high density — a common failure mode distinct from jaggedness.
+        x = 60
+        for _ in range(15):
+            painter.drawLine(QPointF(x, 450), QPointF(x, 550))
+            x += 6
 
         painter.end()
         self.update()
