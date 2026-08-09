@@ -84,4 +84,15 @@ class Workspace(QWidget):
     def set_current_tool(self, tool_name):
         self.current_tool = tool_name
 
-        
+    def draw_circle(self, center_x, center_y, radius, color=QColor("black"), width=3):
+        painter = QPainter(self.canvas)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        pen = QPen(color, width)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        painter.setPen(pen)
+
+        painter.drawEllipse(QPointF(center_x, center_y), radius, radius)
+
+        painter.end()
+        self.update()
