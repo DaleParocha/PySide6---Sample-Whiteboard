@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QApplication
-from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor, QPainterPath
+from PySide6.QtGui import QPixmap, QCursor, QPainter, QPen, QColor, QPainterPath, QImage
 from PySide6.QtCore import Qt
 
 from workspace.components.tool_overlay import ToolOverlay
@@ -14,7 +14,7 @@ class Workspace(QWidget):
         geo = self.actual_screen.availableGeometry()
 
         # reuse to resize canvas
-        self.canvas = QPixmap(geo.width(), geo.height())
+        self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
         self.canvas.fill(Qt.GlobalColor.white)
 
         self.tool_overlay = ToolOverlay(self)
@@ -35,14 +35,11 @@ class Workspace(QWidget):
         if self.last_pos is not None:
             # get mouse current position/coords
             current_pos = event.position()
+            mid = (self.last_pos + current_pos) / 2
 
             path = QPainterPath()
-            path.moveTo(self.last_mid)          # start exactly where the last segment ended
-            path.quadTo(self.last_raw, mid)      # curve toward mid, using last raw point as control)
-
-            mid = (self.last_pos + current_pos) / 2
-            path.quadTo(self.last_pos, mid)
-
+            path.moveTo(self.last_mid)           # start exactly where the last segment ended
+            path.quadTo(self.last_pos, mid)      # curve toward mid, using last raw point as control
 
             # paint on canvas
             painter = QPainter(self.canvas)
@@ -64,7 +61,12 @@ class Workspace(QWidget):
             painter.drawPath(path)
             painter.end()
 
-            self.last_pos = current_pos
+            self.last_mid = mid          # next segment starts here
+
+            #  feature?
+            # self.last_raw = current_pos  # next segment's control point
+
+            self.last_pos = current_pos  # next segment's control point
 
             # update every Move event if last_pos != None
             self.update()
@@ -77,7 +79,9 @@ class Workspace(QWidget):
     # start painting
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.drawPixmap(0, 0, self.canvas)
+        painter.drawImage(0, 0, self.canvas)
 
     def set_current_tool(self, tool_name):
         self.current_tool = tool_name
+
+        
