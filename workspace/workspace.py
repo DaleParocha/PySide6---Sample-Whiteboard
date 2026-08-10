@@ -76,10 +76,7 @@ class Workspace(QWidget):
                 painter.setPen(QPen(QColor("White"), self.pen_size * 4))
 
             else:
-                pen = QPen(QColor("black"), self.pen_size)
-                pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-                pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-                painter.setPen(pen)
+                painter.setPen(self.get_current_pen())
 
             painter.drawPath(path)
             painter.end()
@@ -219,3 +216,6 @@ class Workspace(QWidget):
         if "style" in variant:
             pen.setStyle(variant["style"])
         return pen
+
+    def mousePressEvent(self, event):
+        pass
