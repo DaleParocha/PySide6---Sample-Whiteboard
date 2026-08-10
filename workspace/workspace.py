@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QImage
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, QRectF
 
 from collections import deque
 
@@ -24,26 +24,26 @@ class Workspace(QWidget):
         self.last_mid = None
         self.point_buffer = deque(maxlen=4)
 
-        # --- Line tool state ---
-        self.line_start = None     # where the drag began
-        self.line_preview_end = None  # current live end point, while dragging
+        # --- shape tool state (shared by Line, Rectangle, Ellipse) ---
+        self.shape_start = None
+        self.shape_preview_end = None
 
     def mousePressEvent(self, event):
         pos = event.position()
 
-        if self.current_tool == "Line":
-            self.line_start = pos
-            self.line_preview_end = pos
+        if self.current_tool in ("Line", "Rectangle", "Ellipse"):
+            self.shape_start = pos
+            self.shape_preview_end = pos
         else:
             self.point_buffer.clear()
             self.point_buffer.append(pos)
             self.last_mid = pos
 
     def mouseMoveEvent(self, event):
-        if self.current_tool == "Line":
-            if self.line_start is not None:
-                self.line_preview_end = event.position()
-                self.update()   # repaint to show the live preview, canvas untouched
+        if self.current_tool in ("Line", "Rectangle", "Ellipse"):
+            if self.shape_start is not None:
+                self.shape_preview_end = event.position()
+                self.update()
             return
 
         if len(self.point_buffer) > 0:
@@ -75,18 +75,29 @@ class Workspace(QWidget):
             self.update()
 
     def mouseReleaseEvent(self, event):
-        if self.current_tool == "Line":
-            if self.line_start is not None:
+        if self.current_tool in ("Line", "Rectangle", "Ellipse"):
+            if self.shape_start is not None:
+                end_pos = event.position()
                 painter = QPainter(self.canvas)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 pen = QPen(QColor("black"), self.pen_size)
                 pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+                pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
                 painter.setPen(pen)
-                painter.drawLine(self.line_start, event.position())
+
+                if self.current_tool == "Line":
+                    painter.drawLine(self.shape_start, end_pos)
+                elif self.current_tool == "Rectangle":
+                    rect = QRectF(self.shape_start, end_pos).normalized()
+                    painter.drawRect(rect)
+                elif self.current_tool == "Ellipse":
+                    rect = QRectF(self.shape_start, end_pos).normalized()
+                    painter.drawEllipse(rect)
+
                 painter.end()
 
-            self.line_start = None
-            self.line_preview_end = None
+            self.shape_start = None
+            self.shape_preview_end = None
             self.update()
             return
 
@@ -97,14 +108,21 @@ class Workspace(QWidget):
         painter = QPainter(self)
         painter.drawImage(0, 0, self.canvas)
 
-        # draw the live preview ON TOP of the canvas, but never INTO it
-        if self.current_tool == "Line" and self.line_start is not None:
+        if self.current_tool in ("Line", "Rectangle", "Ellipse") and self.shape_start is not None:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             pen = QPen(QColor("black"), self.pen_size)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-            pen.setStyle(Qt.PenStyle.DashLine)   # dashed = visually distinct from a committed line
+            pen.setStyle(Qt.PenStyle.DashLine)
             painter.setPen(pen)
-            painter.drawLine(self.line_start, self.line_preview_end)
+
+            if self.current_tool == "Line":
+                painter.drawLine(self.shape_start, self.shape_preview_end)
+            elif self.current_tool == "Rectangle":
+                rect = QRectF(self.shape_start, self.shape_preview_end).normalized()
+                painter.drawRect(rect)
+            elif self.current_tool == "Ellipse":
+                rect = QRectF(self.shape_start, self.shape_preview_end).normalized()
+                painter.drawEllipse(rect)
 
     def set_current_tool(self, tool_name):
         self.current_tool = tool_name
