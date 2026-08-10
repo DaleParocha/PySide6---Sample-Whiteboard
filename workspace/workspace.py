@@ -217,5 +217,5 @@ class Workspace(QWidget):
             pen.setStyle(variant["style"])
         return pen
 
-    def mousePressEvent(self, event):
-        pass
+    def set_pen_variant(self, variant_name):
+        self.current_pen_variant = variant_name
