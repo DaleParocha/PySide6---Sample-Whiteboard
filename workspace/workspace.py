@@ -219,3 +219,22 @@ class Workspace(QWidget):
 
     def set_pen_variant(self, variant_name):
         self.current_pen_variant = variant_name
+
+    def stamp_brush(self, from_pos, to_pos):
+        painter = QPainter(self.canvas)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)   # no outline on each dab
+        painter.setBrush(QColor("black"))    # dabs are FILLED circles
+
+        radius = self.pen_size / 2
+
+        distance = ((to_pos.x() - from_pos.x()) ** 2 + (to_pos.y() - from_pos.y()) ** 2) ** 0.5
+        steps = max(1, int(distance / (radius * 0.5)))   # denser spacing = smoother blend
+
+        for i in range(steps + 1):
+            t = i / steps
+            x = from_pos.x() + (to_pos.x() - from_pos.x()) * t
+            y = from_pos.y() + (to_pos.y() - from_pos.y()) * t
+            painter.drawEllipse(QPointF(x, y), radius, radius)
+
+        painter.end()
