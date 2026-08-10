@@ -11,7 +11,7 @@ class ToolOverlay(QWidget):
 
         self.setStyleSheet("""
             QWidget#overlayBox {
-                background-color: transparent;
+                background-color: white;
                 border: 1px solid rgba(128, 128, 128, 80);
                 border-radius: 8px;
             }
