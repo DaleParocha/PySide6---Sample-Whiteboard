@@ -15,6 +15,14 @@ class Workspace(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.pen_variants = {
+            "Fine":       {"color": QColor("black"), "width": 2},
+            "Marker":     {"color": QColor("black"), "width": 8},
+            "Highlighter":{"color": QColor(255, 255, 0, 120), "width": 20},  # semi-transparent yellow
+            "Dashed":     {"color": QColor("black"), "width": 3, "style": Qt.PenStyle.DashLine},
+        }
+        self.current_pen_variant = "Fine"
+
         self.pen_size = 3
 
         # get screen measurements
@@ -63,6 +71,7 @@ class Workspace(QWidget):
             painter = QPainter(self.canvas)
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+            # to be changed
             if self.current_tool == "Eraser":
                 painter.setPen(QPen(QColor("White"), self.pen_size * 4))
 
