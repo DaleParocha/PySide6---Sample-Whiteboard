@@ -210,3 +210,12 @@ class Workspace(QWidget):
 
     def set_pen_size(self, size):
         self.pen_size = size
+
+    def get_current_pen(self):
+        variant = self.pen_variants[self.current_pen_variant]
+        pen = QPen(variant["color"], variant["width"] * (self.pen_size / 3))
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        if "style" in variant:
+            pen.setStyle(variant["style"])
+        return pen
