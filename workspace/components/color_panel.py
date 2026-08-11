@@ -90,6 +90,19 @@ class ColorPanelWidget(QWidget):
 
         self._apply_color(QColor("black"), from_panel=False, from_rgb=False)
 
+    def _make_rgb_slider(self, label_text):
+        row = QWidget()
+        row_layout = QHBoxLayout(row)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        label = QLabel(f"{label_text}: 0")
+        label.setFixedWidth(40)
+        row_layout.addWidget(label)
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setMinimum(0)
+        slider.setMaximum(255)
+        row_layout.addWidget(slider)
+        return slider, label
+
 
 
     
