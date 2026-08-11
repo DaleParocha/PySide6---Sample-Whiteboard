@@ -107,6 +107,11 @@ class ColorPanelWidget(QWidget):
         color = QColor.fromHsv(hue, sat, val)
         self._apply_color(color, from_panel=True, from_rgb=False)
 
+    def on_hue_changed(self, hue):
+        self.panel.set_hue(hue)
+        color = QColor.fromHsv(hue, self.panel.sat, self.panel.val)
+        self._apply_color(color, from_panel=True, from_rgb=False)
+
 
 
     
