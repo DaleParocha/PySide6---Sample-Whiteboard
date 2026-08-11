@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QEvent, Qt
 
+from workspace.components.color_panel import ColorPickerWidget
 
 class ToolOverlay(QWidget):
     def __init__(self, parent):
@@ -57,6 +58,10 @@ class ToolOverlay(QWidget):
 
         slider_row.addStretch(1)
         outer_layout.addLayout(slider_row)
+
+        # color panel
+        self.color_picker = ColorPickerWidget(parent)
+        outer_layout.addWidget(self.color_picker)
 
         # tool buttons
         button_row = QHBoxLayout()
