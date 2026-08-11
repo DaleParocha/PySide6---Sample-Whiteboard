@@ -58,10 +58,38 @@ class ColorPanel(QWidget):
         if event.buttons() & Qt.MouseButton.LeftButton:
             self._pick_at(event.position())
 
-class ColorPickerWidget(QWidget):
+class ColorPanelWidget(QWidget):
     def __init__(self, parent):
         super().__init__()
+        self.parent = parent
+        self._updating = False   # guard flag against feedback loops
 
-        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        self.panel = ColorPanel(self)
+        layout.addWidget(self.panel)
+
+        self.hue_slider = QSlider(Qt.Orientation.Horizontal)
+        self.hue_slider.setMinimum(0)
+        self.hue_slider.setMaximum(359)
+        self.hue_slider.setValue(0)
+        self.hue_slider.valueChanged.connect(self.on_hue_changed)
+        layout.addWidget(self.hue_slider)
+
+        self.r_slider, self.r_label = self._make_rgb_slider("R")
+        self.g_slider, self.g_label = self._make_rgb_slider("G")
+        self.b_slider, self.b_label = self._make_rgb_slider("B")
+        for row_widget in (self.r_slider.parentWidget(), self.g_slider.parentWidget(), self.b_slider.parentWidget()):
+            layout.addWidget(row_widget)
+
+        self.r_slider.valueChanged.connect(self.on_rgb_changed)
+        self.g_slider.valueChanged.connect(self.on_rgb_changed)
+        self.b_slider.valueChanged.connect(self.on_rgb_changed)
+
+        self._apply_color(QColor("black"), from_panel=False, from_rgb=False)
+
+
 
     
