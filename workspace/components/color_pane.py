@@ -42,3 +42,12 @@ class ColorPanel(QWidget):
         painter.setPen(QPen(QColor("white"), 2))
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawEllipse(x - 6, y - 6, 12, 12)
+
+    def _pick_at(self, pos):
+        x = max(0, min(pos.x(), self.width()))
+        y = max(0, min(pos.y(), self.height()))
+        self.sat = int((x / self.width()))
+        self.val = int((1 - y / self.height() * 255))
+        self.update()
+        self.parent_picker.on_panel_picked(self.hue, self.sat, self.val)
+        
