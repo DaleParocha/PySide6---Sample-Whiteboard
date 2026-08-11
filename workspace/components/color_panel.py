@@ -118,5 +118,25 @@ class ColorPanelWidget(QWidget):
         color = QColor(self.r_slider.value(), self.g_slider.value(), self.b_slider.value())
         self._apply_color(color, from_panel=False, from_rgb=True)
 
+    def _apply_color(self, color, from_panel, from_rgb):
+        self._updating = True
+
+        self.r_slider.setValue(color.red())
+        self.g_slider.setValue(color.green())
+        self.b_slider.setValue(color.blue())
+        self.r_label.setText(f"R: {color.red()}")
+        self.g_label.setText(f"G: {color.green()}")
+        self.b_label.setText(f"B: {color.blue()}")
+
+        if from_rgb:
+            h, s, v, _ = color.getHsv()
+            self.hue_slider.blockSignals(True)
+            self.hue_slider.setValue(max(h, 0))
+            self.hue_slider.blockSignals(False)
+            self.panel.hue = max(h, 0)
+            self.panel.set_marker(s, v)
+
+        self._updating = False
+        self.parent.set_pen_color(color)
 
     
