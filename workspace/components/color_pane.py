@@ -54,4 +54,14 @@ class ColorPanel(QWidget):
     def mousePressEvent(self, event):
         self._pick_at(event.position())
 
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            self._pick_at(event.position())
+
+class ColorPickerWidget(QWidget):
+    def __init__(self, parent):
+        super().__init__()
+
+        
+
     
