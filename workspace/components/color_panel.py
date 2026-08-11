@@ -103,6 +103,10 @@ class ColorPanelWidget(QWidget):
         row_layout.addWidget(slider)
         return slider, label
 
+    def on_panel_picked(self, hue, sat, val):
+        color = QColor.fromHsv(hue, sat, val)
+        self._apply_color(color, from_panel=True, from_rgb=False)
+
 
 
     
