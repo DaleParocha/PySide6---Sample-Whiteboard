@@ -12,6 +12,7 @@ class Workspace(QWidget):
         super().__init__()
 
         self.pen_size = 3
+        self.pen_color = QColor("black")
 
         self.actual_screen = QApplication.primaryScreen()
         geo = self.actual_screen.availableGeometry()
