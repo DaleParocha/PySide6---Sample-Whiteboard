@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
-    QButtonGroup, QSlider, QLabel
+    QButtonGroup, QSlider, QLabel, QSizePolicy
 )
 from PySide6.QtCore import QEvent, Qt
 
@@ -39,9 +39,11 @@ class ToolOverlay(QWidget):
 
         # size slider
         slider_row = QHBoxLayout()
-        slider_row.setSpacing(10)
+        slider_row.setSpacing(8)
+        slider_row.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         self.size_label = QLabel("Size: 3")
+        self.size_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         slider_row.addWidget(self.size_label)
 
         self.size_slider = QSlider(Qt.Orientation.Horizontal)
@@ -53,6 +55,7 @@ class ToolOverlay(QWidget):
         self.size_slider.valueChanged.connect(self.update_size_label)
         slider_row.addWidget(self.size_slider)
 
+        slider_row.addStretch(1)
         outer_layout.addLayout(slider_row)
 
         # tool buttons
