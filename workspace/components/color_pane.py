@@ -50,4 +50,8 @@ class ColorPanel(QWidget):
         self.val = int((1 - y / self.height() * 255))
         self.update()
         self.parent_picker.on_panel_picked(self.hue, self.sat, self.val)
-        
+
+    def mousePressEvent(self, event):
+        self._pick_at(event.position())
+
+    
