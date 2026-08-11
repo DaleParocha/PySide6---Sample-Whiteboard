@@ -129,3 +129,8 @@ class Workspace(QWidget):
 
     def set_pen_size(self, size):
         self.pen_size = size
+
+    def set_pen_color(self, color):
+        self.pen_color = color
+
+    
