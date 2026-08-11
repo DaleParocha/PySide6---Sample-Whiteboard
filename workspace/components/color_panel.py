@@ -112,6 +112,11 @@ class ColorPanelWidget(QWidget):
         color = QColor.fromHsv(hue, self.panel.sat, self.panel.val)
         self._apply_color(color, from_panel=True, from_rgb=False)
 
+    def on_rgb_changed(self):
+        if self._updating:
+            return
+        color = QColor(self.r_slider.value(), self.g_slider.value(), self.b_slider.value())
+        self._apply_color(color, from_panel=False, from_rgb=True)
 
 
     
