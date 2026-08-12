@@ -45,6 +45,9 @@ class Workspace(QWidget):
             self.last_mid = pos
 
     def mouseMoveEvent(self, event):
+        if not (event.buttons() & Qt.MouseButton.LeftButton):
+            return
+        
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
             if self.shape_start is not None:
                 self.shape_preview_end = event.position()
