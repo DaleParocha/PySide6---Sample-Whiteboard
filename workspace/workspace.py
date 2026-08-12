@@ -64,7 +64,7 @@ class Workspace(QWidget):
             if self.current_tool == "Eraser":
                 painter.setPen(QPen(QColor("white"), self.pen_size * 4))
             else:
-                pen = QPen(QColor("black"), self.pen_size)
+                pen = QPen(self.pen_color, self.pen_size)
                 pen.setCapStyle(Qt.PenCapStyle.RoundCap)
                 pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
                 painter.setPen(pen)
@@ -81,7 +81,7 @@ class Workspace(QWidget):
                 end_pos = event.position()
                 painter = QPainter(self.canvas)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-                pen = QPen(QColor("black"), self.pen_size)
+                pen = QPen(self.pen_color, self.pen_size)
                 pen.setCapStyle(Qt.PenCapStyle.RoundCap)
                 pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
                 painter.setPen(pen)

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSlider, QLabel
 from PySide6.QtGui import QPainter, QColor, QLinearGradient, QPen
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt
 
 
 class ColorPanel(QWidget):
@@ -8,9 +8,9 @@ class ColorPanel(QWidget):
         super().__init__()
         self.parent_picker = parent_picker
         self.setFixedSize(140, 140)
-        self.hue = 0          # 0-359
-        self.sat = 255        # 0-255, x-axis
-        self.val = 255        # 0-255, y-axis (inverted: top = bright)
+        self.hue = 0
+        self.sat = 255
+        self.val = 255
 
     def set_hue(self, hue):
         self.hue = hue
@@ -46,8 +46,8 @@ class ColorPanel(QWidget):
     def _pick_at(self, pos):
         x = max(0, min(pos.x(), self.width()))
         y = max(0, min(pos.y(), self.height()))
-        self.sat = int((x / self.width()))
-        self.val = int((1 - y / self.height() * 255))
+        self.sat = int((x / self.width()) * 255)
+        self.val = int((1 - y / self.height()) * 255)
         self.update()
         self.parent_picker.on_panel_picked(self.hue, self.sat, self.val)
 
@@ -58,11 +58,12 @@ class ColorPanel(QWidget):
         if event.buttons() & Qt.MouseButton.LeftButton:
             self._pick_at(event.position())
 
+
 class ColorPanelWidget(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self._updating = False   # guard flag against feedback loops
+        self._updating = False
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -78,11 +79,13 @@ class ColorPanelWidget(QWidget):
         self.hue_slider.valueChanged.connect(self.on_hue_changed)
         layout.addWidget(self.hue_slider)
 
-        self.r_slider, self.r_label = self._make_rgb_slider("R")
-        self.g_slider, self.g_label = self._make_rgb_slider("G")
-        self.b_slider, self.b_label = self._make_rgb_slider("B")
-        for row_widget in (self.r_slider.parentWidget(), self.g_slider.parentWidget(), self.b_slider.parentWidget()):
-            layout.addWidget(row_widget)
+        self.r_slider, self.r_label, r_row = self._make_rgb_slider("R")
+        self.g_slider, self.g_label, g_row = self._make_rgb_slider("G")
+        self.b_slider, self.b_label, b_row = self._make_rgb_slider("B")
+
+        layout.addWidget(r_row)
+        layout.addWidget(g_row)
+        layout.addWidget(b_row)
 
         self.r_slider.valueChanged.connect(self.on_rgb_changed)
         self.g_slider.valueChanged.connect(self.on_rgb_changed)
@@ -101,7 +104,7 @@ class ColorPanelWidget(QWidget):
         slider.setMinimum(0)
         slider.setMaximum(255)
         row_layout.addWidget(slider)
-        return slider, label
+        return slider, label, row
 
     def on_panel_picked(self, hue, sat, val):
         color = QColor.fromHsv(hue, sat, val)
@@ -138,5 +141,3 @@ class ColorPanelWidget(QWidget):
 
         self._updating = False
         self.parent.set_pen_color(color)
-
-    
