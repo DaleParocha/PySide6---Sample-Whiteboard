@@ -83,6 +83,9 @@ class Workspace(QWidget):
             self.update()
 
     def mouseReleaseEvent(self, event):
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
             if self.shape_start is not None:
                 end_pos = event.position()
