@@ -30,6 +30,10 @@ class Workspace(QWidget):
         self.shape_preview_end = None
 
     def mousePressEvent(self, event):
+        # left click only
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+
         pos = event.position()
 
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
