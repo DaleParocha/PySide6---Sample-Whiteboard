@@ -162,4 +162,10 @@ class Workspace(QWidget):
             self.undo_stack.pop(0)
         self.redo_stack.clear()
 
-    
+    def undo(self):
+        if not self.redo_stack:
+            return
+
+        self.undo_stack.append(self.canvas.copy())
+        self.canvas = self.redo_stack.pop()
+        self.update()
