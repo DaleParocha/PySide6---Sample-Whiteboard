@@ -45,6 +45,9 @@ class Workspace(QWidget):
         if event.button() != Qt.MouseButton.LeftButton:
             return
 
+        #  check before changes in canvas
+        self.push_undo_state() 
+
         pos = event.position()
 
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
