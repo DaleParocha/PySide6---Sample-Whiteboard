@@ -161,7 +161,7 @@ class Workspace(QWidget):
     
     def push_undo_state(self):
         self.undo_stack.append(self.canvas.copy())
-        if len(self._undo_stack) > self.max_history:
+        if len(self.undo_stack) > self.max_history:
             self.undo_stack.pop(0)
         self.redo_stack.clear()
 
