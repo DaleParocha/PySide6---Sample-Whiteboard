@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QApplication
-from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QImage
+from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QImage, QShortcut, QKeySequence
 from PySide6.QtCore import Qt, QPointF, QRectF
 
 from collections import deque
@@ -28,6 +28,17 @@ class Workspace(QWidget):
         # --- shape tool state (shared by Line, Rectangle, Ellipse) ---
         self.shape_start = None
         self.shape_preview_end = None
+
+        # undo/redo
+        self.undo_stack = []
+        self.redo_stack = []
+        self.max_history = 20
+        
+        self.undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self.undo_shortcut.activated.connect(self.undo)
+        
+        self.redo_shortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
+        self.redo_shortcut.activated.connect(self.redo)
 
     def mousePressEvent(self, event):
         # left click only
@@ -143,5 +154,12 @@ class Workspace(QWidget):
 
     def set_pen_color(self, color):
         self.pen_color = color
+
+    
+    def push_undo_state(self):
+        self.undo_stack.append(self.canvas.copy())
+        if len(self._undo_stack) > self.max_history:
+            self.undo_stack.pop(0)
+        self.redo_stack.clear()
 
     
