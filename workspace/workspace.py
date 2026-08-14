@@ -20,7 +20,8 @@ class Workspace(QWidget):
         self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
         self.canvas.fill(Qt.GlobalColor.transparent)
 
-        
+        self.show_grid = True
+        self.grid_spacing = 40
 
         self.tool_overlay = ToolOverlay(self)
 
