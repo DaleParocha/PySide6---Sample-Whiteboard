@@ -320,32 +320,32 @@ class Workspace(QWidget):
             self.canvas = canvas_copy
             self.update()
 
-def update_cursor(self):
-    if self.current_tool not in ("Pen", "Eraser"):
-        self.setCursor(Qt.CursorShape.CrossCursor)
-        return
+    def update_cursor(self):
+        if self.current_tool not in ("Pen", "Eraser"):
+            self.setCursor(Qt.CursorShape.CrossCursor)
+            return
 
-    if self.current_tool == "Eraser":
-        diameter = max(int(self.pen_size * 4), 6)
-        outline_color = QColor("black")
-        fill_color = QColor(255, 255, 255, 180)
-    else:
-        diameter = max(int(self.pen_size), 6)
-        outline_color = self.pen_color
-        fill_color = QColor(self.pen_color.red(), self.pen_color.green(), self.pen_color.blue(), 120)
+        if self.current_tool == "Eraser":
+            diameter = max(int(self.pen_size * 4), 6)
+            outline_color = QColor("black")
+            fill_color = QColor(255, 255, 255, 180)
+        else:
+            diameter = max(int(self.pen_size), 6)
+            outline_color = self.pen_color
+            fill_color = QColor(self.pen_color.red(), self.pen_color.green(), self.pen_color.blue(), 120)
 
-    padding = 4
-    size = diameter + padding * 2
+        padding = 4
+        size = diameter + padding * 2
 
-    pixmap = QPixmap(size, size)
-    pixmap.fill(Qt.GlobalColor.transparent)
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
 
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.setPen(QPen(outline_color, 1.5))
-    painter.setBrush(fill_color)
-    painter.drawEllipse(padding, padding, diameter, diameter)
-    painter.end()
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(QPen(outline_color, 1.5))
+        painter.setBrush(fill_color)
+        painter.drawEllipse(padding, padding, diameter, diameter)
+        painter.end()
 
-    cursor = QCursor(pixmap, size // 2, size // 2)
-    self.setCursor(cursor)
+        cursor = QCursor(pixmap, size // 2, size // 2)
+        self.setCursor(cursor)
