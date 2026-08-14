@@ -64,13 +64,15 @@ class Workspace(QWidget):
         for y in range(0, self.height(), self.grid_spacing):
             painter.drawLine(0, y, self.width(), y)
 
-            axis_pen = QPen(QColor(120, 120, 120), 2)
-            painter.setPen(axis_pen)
-            center_x = self.width() // 2
-            center_y = self.height() // 2
+        axis_pen = QPen(QColor(120, 120, 120), 2)
+        painter.setPen(axis_pen)
 
-            painter.drawLine(center_x, 0, center_x, self.height())
-            painter.drawLine(0, center_y, self.width(), center_y)
+        # snap to the nearest actual grid line, not the true geometric center
+        center_x = round((self.width() / 2) / self.grid_spacing) * self.grid_spacing
+        center_y = round((self.height() / 2) / self.grid_spacing) * self.grid_spacing
+
+        painter.drawLine(center_x, 0, center_x, self.height())
+        painter.drawLine(0, center_y, self.width(), center_y)
 
     # toggle grid
     def toggle_grid(self):
