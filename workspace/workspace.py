@@ -20,6 +20,7 @@ class Workspace(QWidget):
         self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
         self.canvas.fill(Qt.GlobalColor.transparent)
 
+        # enable grid
         self.show_grid = True
         self.grid_spacing = 40
 
@@ -97,7 +98,8 @@ class Workspace(QWidget):
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
             if self.current_tool == "Eraser":
-                painter.setPen(QPen(QColor("white"), self.pen_size * 4))
+                painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear) 
+                painter.setPen(QPen(QColor(0, 0, 0, 0), self.pen_size * 4))
             else:
                 pen = QPen(self.pen_color, self.pen_size)
                 pen.setCapStyle(Qt.PenCapStyle.RoundCap)
