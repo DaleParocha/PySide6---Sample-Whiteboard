@@ -18,7 +18,9 @@ class Workspace(QWidget):
         geo = self.actual_screen.availableGeometry()
 
         self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
-        self.canvas.fill(Qt.GlobalColor.white)
+        self.canvas.fill(Qt.GlobalColor.transparent)
+
+        
 
         self.tool_overlay = ToolOverlay(self)
 
