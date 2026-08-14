@@ -33,12 +33,23 @@ class Workspace(QWidget):
         self.undo_stack = []
         self.redo_stack = []
         self.max_history = 20
-        
+
+        # undo shortcut 
         self.undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
         self.undo_shortcut.activated.connect(self.undo)
-        
+
+        # redo shortcut
         self.redo_shortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
         self.redo_shortcut.activated.connect(self.redo)
+
+        # save shortcut
+        self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        self.save_shortcut.activated.connect(self.save_canvas)
+
+        # load shortcut
+        self.load_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
+        self.load_shortcut.activated.connect(self.load_canvas)
+
 
     def mousePressEvent(self, event):
         # left click only
@@ -195,5 +206,41 @@ class Workspace(QWidget):
             self.push_undo_state()
             self.canvas.fill(Qt.GlobalColor.white)
             self.update()
-    
-        
+
+    # save / load
+    def save_canvas(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Whiteboard",
+            "",
+            "PNG Files (*.png)"
+        )
+        if path:
+            if not path.lower().endswith(".png"):
+                path += ".png"
+            self.canvas.save(path, "PNG")
+
+    def load_canvas(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load Whiteboard",
+            "",
+            "PNG Files (*.png)"
+        )
+        if path:
+            loaded = QImage(path)
+            if loaded.isNull():
+                QMessageBox.warning(self, "Load Failed", "Could not open that as an image.")
+                return
+
+            self.push_undo_state()
+
+            canvas_copy = QImage(self.canvas.size(), QImage.Format.Format_ARGB32)
+            canvas_copy.fill(Qt.GlobalColor.white)
+
+            painter = QPainter(canvas_copy)
+            painter.drawImage(0, 0, loaded)
+            painter.end()
+
+            self.canvas = canvas_copy
+            self.update()        
