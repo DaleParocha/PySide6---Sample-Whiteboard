@@ -56,7 +56,7 @@ class Workspace(QWidget):
 
     #  create grid
     def draw_grid(self, painter):
-        pen = QPen(QColor(200, 200, 200), 1)
+        pen = QPen(QColor(200, 200, 200), .25)
         painter.setPen(pen)
 
         for x in range(0, self.width(), self.grid_spacing):
