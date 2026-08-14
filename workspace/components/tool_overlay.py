@@ -87,6 +87,19 @@ class ToolOverlay(QWidget):
         clear_btn.clicked.connect(parent.clear_canvas)
         button_row.addWidget(clear_btn)
 
+        # save button
+        save_btn = QPushButton("Save")
+        save_btn.setFlat(True)
+        save_btn.clicked.connect(parent.save_canvas)
+        button_row.addWidget(save_btn)
+
+        # load button
+        load_btn = QPushButton("Load")
+        load_btn.setFlat(True)
+        load_btn.clicked.connect(parent.load_canvas)
+        button_row.addWidget(load_btn)
+
+        # row buttons
         outer_layout.addLayout(button_row)
 
         parent.set_current_tool(tools[0])
