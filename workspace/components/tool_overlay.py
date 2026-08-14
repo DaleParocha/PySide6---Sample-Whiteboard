@@ -99,6 +99,14 @@ class ToolOverlay(QWidget):
         load_btn.clicked.connect(parent.load_canvas)
         button_row.addWidget(load_btn)
 
+        # toggle grid button
+        grid_btn = QPushButton("Grid")
+        grid_btn.setCheckable(True)
+        grid_btn.setChecked(True)
+        grid_btn.setFlat(True)
+        grid_btn.clicked.connect(parent.toggle_grid)
+        button_row.addWidget(grid_btn)
+
         # row buttons
         outer_layout.addLayout(button_row)
 
