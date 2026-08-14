@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QApplication
+from PySide6.QtWidgets import QWidget, QApplication, QMessageBox
 from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QImage, QShortcut, QKeySequence
 from PySide6.QtCore import Qt, QPointF, QRectF
 
@@ -180,5 +180,20 @@ class Workspace(QWidget):
         self.undo_stack.append(self.canvas.copy())
         self.canvas = self.redo_stack.pop()
         self.update()
+
+    # clear all -----------------------------------------------------
+    def clear_canvas(self):
+        reply = QMessageBox.question(
+            self,
+            "Clear Canvas"
+            "This will erase everything on the canvas. Are you sure?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            self.push_undo_state()
+            self.canvas.fill(Qt.GlobalColor.white)
+            self.update()
     
         
