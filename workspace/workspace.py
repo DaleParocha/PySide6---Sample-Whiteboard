@@ -64,7 +64,7 @@ class Workspace(QWidget):
         for y in range(0, self.height(), self.grid_spacing):
             painter.drawLine(0, y, self.width(), y)
 
-        axis_pen = QPen(QColor(120, 120, 120, 140), 1.5)
+        axis_pen = QPen(QColor(120, 120, 120, 140), .5)
         painter.setPen(axis_pen)
 
         # snap to the nearest actual grid line, not the true geometric center
