@@ -18,7 +18,7 @@ class Workspace(QWidget):
 
         # starting zoom/panning vars 
         self.view_offset = QPointF(0, 0)
-        self.view_Scale = 1.0
+        self.view_scale = 1.0
         self.panning = False
         self.last_pan_pos =None
 
@@ -129,7 +129,7 @@ class Workspace(QWidget):
     def to_canvas(self, screen_pos):
         return QPointF(
             (screen_pos.x() - self.view_offset.x()) / self.view_scale,
-            (screen_pos.y() - self.view_offset,y()) / self.view_scale,
+            (screen_pos.y() - self.view_offset.y()) / self.view_scale,
         )
 
     def mousePressEvent(self, event):
@@ -172,12 +172,12 @@ class Workspace(QWidget):
         
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
             if self.shape_start is not None:
-                self.shape_preview_end = event.position()
+                self.shape_preview_end = self.to_canvas(event.position())
                 self.update()
             return
 
         if len(self.point_buffer) > 0:
-            self.point_buffer.append(event.position())
+            self.point_buffer.append(self.to_canvas(event.position()))
 
             avg_x = sum(p.x() for p in self.point_buffer) / len(self.point_buffer)
             avg_y = sum(p.y() for p in self.point_buffer) / len(self.point_buffer)
@@ -218,7 +218,7 @@ class Workspace(QWidget):
 
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
             if self.shape_start is not None:
-                end_pos = event.position()
+                end_pos = self.to_canvas(event.position())
                 painter = QPainter(self.canvas)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 pen = QPen(self.pen_color, self.pen_size)
@@ -425,3 +425,8 @@ class Workspace(QWidget):
 
         cursor = QCursor(pixmap, size // 2, size // 2)
         self.setCursor(cursor)
+
+
+# issue can pan but scroll up is going up instead of zooming in/out
+# and grid stays on starting screen everything else is white and cant paint onto
+# im going to sleep its 4 am
