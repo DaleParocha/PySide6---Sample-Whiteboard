@@ -311,7 +311,7 @@ class Workspace(QWidget):
             self.push_undo_state()
 
             canvas_copy = QImage(self.canvas.size(), QImage.Format.Format_ARGB32)
-            canvas_copy.fill(Qt.GlobalColor.white)
+            canvas_copy.fill(Qt.GlobalColor.transparent)
 
             painter = QPainter(canvas_copy)
             painter.drawImage(0, 0, loaded)
