@@ -11,12 +11,22 @@ class Workspace(QWidget):
     def __init__(self):
         super().__init__()
 
+        # starting pen
         self.pen_size = 3
         self.pen_color = QColor("black")
+        self.current_tool = "Pen"
 
+        # starting zoom/panning vars 
+        self.view_offset = QPointF(0, 0)
+        self.view_Scale = 1.0
+        self.panning = False
+        self.last_pan_pos =None
+
+        # get screen size
         self.actual_screen = QApplication.primaryScreen()
         geo = self.actual_screen.availableGeometry()
 
+        # canvas initializing
         self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
         self.canvas.fill(Qt.GlobalColor.transparent)
 
@@ -27,7 +37,6 @@ class Workspace(QWidget):
         self.grid_cache = None
         self.rebuild_grid_cache()
         
-
         self.tool_overlay = ToolOverlay(self)
 
         self.last_mid = None
@@ -116,7 +125,21 @@ class Workspace(QWidget):
             self.rebuild_grid_cache()
         self.update()
 
+    # coordinate conversion
+    def to_canvas(self, screen_pos):
+        return QPointF(
+            (screen_pos.x() - self.view_offset.x()) / self.view_scale,
+            (screen_pos.y() - self.view_offset,y()) / self.view_scale,
+        )
+
     def mousePressEvent(self, event):
+        # panning when middle button
+        if event.button() == Qt.MouseButton.MiddleButton:
+            self.panning = True
+            self.last_pan_pos = event.position()
+            self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            return
+
         # left click only
         if event.button() != Qt.MouseButton.LeftButton:
             return
@@ -124,7 +147,7 @@ class Workspace(QWidget):
         #  check before changes in canvas
         self.push_undo_state() 
 
-        pos = event.position()
+        pos = self.to_canvas(event.position())
 
         if self.current_tool in ("Line", "Rectangle", "Ellipse"):
             self.shape_start = pos
@@ -135,6 +158,15 @@ class Workspace(QWidget):
             self.last_mid = pos
 
     def mouseMoveEvent(self, event):
+        # if panning
+        if self.panning:
+            delta = event.position() - self.last_pan_pos
+            self.view_offset += delta
+            self.last_pan_pos = event.position()
+            self.update()
+            return
+
+        # anything that is not left mouse button
         if not (event.buttons() & Qt.MouseButton.LeftButton):
             return
         
@@ -174,6 +206,13 @@ class Workspace(QWidget):
             self.update()
 
     def mouseReleaseEvent(self, event):
+        # if panning
+        if event.button() == Qt.MouseButton.MiddleButton:
+            self.panning = False
+            self.setCursor(Qt.CursorShape.ArrowCursor)
+            return
+
+        # if not left mouse button
         if event.button() != Qt.MouseButton.LeftButton:
             return
 
@@ -206,9 +245,33 @@ class Workspace(QWidget):
         self.point_buffer.clear()
         self.last_mid = None
 
+    # on scroll zoom in/out
+    def wheelEvent(self, event):
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            angle = event.angleDelta().y()
+            factor = 1.15 if angle > 0 else 1 / 1.15
+
+            old_canvas_pos = self.to_canvas(event.position())
+            self.view_scale = max(0.2, min(self.view_scale * factor, 8))
+
+            new_screen_pos = QPointF(
+                old_canvas_pos.x() * self.view_scale + self.view_offset.x(),
+                old_canvas_pos.y() * self.view_scale + self.view_offset.y(),
+            )
+            self.view_offset += event.position() - new_screen_pos
+        else:
+            self.view_offset += QPointF(event.angleDelta().x(), event.angleDelta().y())
+
+        self.rebuild_grid_cache()
+        self.update()
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.white)
+
+        painter.save()
+        painter.translate(self.view_offset)
+        painter.scale(self.view_scale, self.view_scale)
 
         if self.show_grid and self.grid_cache is not None:
             painter.drawPixmap(0, 0, self.grid_cache)   # one cheap blit, not hundreds of lines
@@ -218,6 +281,7 @@ class Workspace(QWidget):
         if self.current_tool in ("Line", "Rectangle", "Ellipse") and self.shape_start is not None:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             pen = QPen(QColor("black"), self.pen_size)
+            pen.setCosmetic(True)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
             pen.setStyle(Qt.PenStyle.DashLine)
             painter.setPen(pen)
@@ -231,6 +295,8 @@ class Workspace(QWidget):
                 rect = QRectF(self.shape_start, self.shape_preview_end).normalized()
                 painter.drawEllipse(rect)
 
+            painter.restore()
+
     def resizeEvent(self, event):
         self.rebuild_grid_cache()
         super().resizeEvent(event)
@@ -238,11 +304,20 @@ class Workspace(QWidget):
     def set_current_tool(self, tool_name):
         self.current_tool = tool_name
 
+        # call update cursor func
+        self.update_cursor()
+
     def set_pen_size(self, size):
         self.pen_size = size
 
+        # call update cursor func
+        self.update_cursor()
+
     def set_pen_color(self, color):
         self.pen_color = color
+
+        # call update cursor func
+        self.update_cursor()
 
     # undo redo ----------------------------------------------------------
     def push_undo_state(self):
@@ -320,6 +395,7 @@ class Workspace(QWidget):
             self.canvas = canvas_copy
             self.update()
 
+    # cursor preview
     def update_cursor(self):
         if self.current_tool not in ("Pen", "Eraser"):
             self.setCursor(Qt.CursorShape.CrossCursor)
