@@ -54,6 +54,23 @@ class Workspace(QWidget):
         self.load_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
         self.load_shortcut.activated.connect(self.load_canvas)
 
+    #  create grid
+    def draw_grid(self, painter):
+        pen = QPen(QColor(200, 200, 200), 1)
+        painter.setPen(pen)
+
+        for x in range(0, self.width(), self.grid_spacing):
+            painter.drawLine(x, 0, x, self.height())
+        for y in range(0, self.height(), self.grid_spacing):
+            painter.drawLine(0, y, self.width(), y)
+
+            axis_pen = QPen(QColor(120, 120, 120), 2)
+            painter.setPen(axis_pen)
+            center_x = self.width() // 2
+            center_y = self.height() // 2
+
+            painter.drawLine(center_x, 0, center_x, self.height())
+            painter.drawLine(0, center_y, self.width(), center_y)
 
     def mousePressEvent(self, event):
         # left click only
@@ -147,6 +164,11 @@ class Workspace(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
+        painter.fillRect(self.rect(), Qt.GlobalColor.white)
+
+        if self.show_grid:
+            self.draw_grid(painter)
+
         painter.drawImage(0, 0, self.canvas)
 
         if self.current_tool in ("Line", "Rectangle", "Ellipse") and self.shape_start is not None:
