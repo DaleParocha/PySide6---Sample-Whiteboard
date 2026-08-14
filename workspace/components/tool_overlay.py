@@ -81,6 +81,12 @@ class ToolOverlay(QWidget):
             button_row.addWidget(btn)
             self.tool_group.addButton(btn)
 
+        # clear Push Button
+        clear_btn = QPushButton("Clear")
+        clear_btn.setFlat(True)
+        clear_btn.clicked.connect(parent.clear_canvas)
+        button_row.addWidget(clear_btn)
+
         outer_layout.addLayout(button_row)
 
         parent.set_current_tool(tools[0])
