@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFileDialog
-from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QImage, QShortcut, QKeySequence
+from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QImage, QShortcut, QKeySequence, QPixmap
 from PySide6.QtCore import Qt, QPointF, QRectF
 
 from collections import deque
@@ -23,13 +23,17 @@ class Workspace(QWidget):
         # enable grid
         self.show_grid = True
         self.grid_spacing = 40
+        self.grid_subdivisions = 5
+        self.grid_cache = None
+        self.rebuild_grid_cache()
+        
 
         self.tool_overlay = ToolOverlay(self)
 
         self.last_mid = None
         self.point_buffer = deque(maxlen=4)
 
-        # --- shape tool state (shared by Line, Rectangle, Ellipse) ---
+        # shape tool state (Line Rectangle Ellipse) ------------
         self.shape_start = None
         self.shape_preview_end = None
 
@@ -54,20 +58,51 @@ class Workspace(QWidget):
         self.load_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
         self.load_shortcut.activated.connect(self.load_canvas)
 
+    # create grid 2
+    def rebuild_grid_cache(self):
+        self.grid_cache = QPixmap(self.width(), self.height())
+        self.grid_cache.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(self.grid_cache)
+        self.draw_grid(painter)
+        painter.end()
+
     #  create grid
     def draw_grid(self, painter):
-        pen = QPen(QColor(200, 200, 200), .25)
-        painter.setPen(pen)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        minor_spacing = self.grid_spacing / self.grid_subdivisions
+
+        # minor grid ---
+        minor_pen = QPen(QColor(150, 150, 150, 35), 1)
+        minor_pen.setCosmetic(True)
+        painter.setPen(minor_pen)
+
+        x = 0
+        while x < self.width():
+            painter.drawLine(int(x), 0, int(x), self.height())
+            x += minor_spacing
+
+        y = 0
+        while y < self.height():
+            painter.drawLine(0, int(y), self.width(), int(y))
+            y += minor_spacing
+
+        # major grid ---
+        major_pen = QPen(QColor(150, 150, 150, 80), 1)
+        major_pen.setCosmetic(True)
+        painter.setPen(major_pen)
 
         for x in range(0, self.width(), self.grid_spacing):
             painter.drawLine(x, 0, x, self.height())
         for y in range(0, self.height(), self.grid_spacing):
             painter.drawLine(0, y, self.width(), y)
 
-        axis_pen = QPen(QColor(120, 120, 120, 140), .5)
+        # axis ---
+        axis_pen = QPen(QColor(120, 120, 120, 140), 1.5)
+        axis_pen.setCosmetic(True)
         painter.setPen(axis_pen)
 
-        # snap to the nearest actual grid line, not the true geometric center
         center_x = round((self.width() / 2) / self.grid_spacing) * self.grid_spacing
         center_y = round((self.height() / 2) / self.grid_spacing) * self.grid_spacing
 
@@ -77,6 +112,8 @@ class Workspace(QWidget):
     # toggle grid
     def toggle_grid(self):
         self.show_grid = not self.show_grid
+        if self.show_grid and self.grid_cache is None:
+            self.rebuild_grid_cache()
         self.update()
 
     def mousePressEvent(self, event):
@@ -173,8 +210,8 @@ class Workspace(QWidget):
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.white)
 
-        if self.show_grid:
-            self.draw_grid(painter)
+        if self.show_grid and self.grid_cache is not None:
+            painter.drawPixmap(0, 0, self.grid_cache)   # one cheap blit, not hundreds of lines
 
         painter.drawImage(0, 0, self.canvas)
 
@@ -193,6 +230,10 @@ class Workspace(QWidget):
             elif self.current_tool == "Ellipse":
                 rect = QRectF(self.shape_start, self.shape_preview_end).normalized()
                 painter.drawEllipse(rect)
+
+    def resizeEvent(self, event):
+        self.rebuild_grid_cache()
+        super().resizeEvent(event)
 
     def set_current_tool(self, tool_name):
         self.current_tool = tool_name
@@ -238,7 +279,7 @@ class Workspace(QWidget):
 
         if reply == QMessageBox.StandardButton.Yes:
             self.push_undo_state()
-            self.canvas.fill(Qt.GlobalColor.white)
+            self.canvas.fill(Qt.GlobalColor.transparent)
             self.update()
 
     # save / load
