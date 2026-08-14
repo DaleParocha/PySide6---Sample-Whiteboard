@@ -185,7 +185,7 @@ class Workspace(QWidget):
     def clear_canvas(self):
         reply = QMessageBox.question(
             self,
-            "Clear Canvas"
+            "Clear Canvas",
             "This will erase everything on the canvas. Are you sure?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
