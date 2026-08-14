@@ -72,6 +72,11 @@ class Workspace(QWidget):
             painter.drawLine(center_x, 0, center_x, self.height())
             painter.drawLine(0, center_y, self.width(), center_y)
 
+    # toggle grid
+    def toggle_grid(self):
+        self.show_grid = not self.show_grid
+        self.update()
+
     def mousePressEvent(self, event):
         # left click only
         if event.button() != Qt.MouseButton.LeftButton:
