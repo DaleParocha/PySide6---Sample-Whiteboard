@@ -158,7 +158,7 @@ class Workspace(QWidget):
     def set_pen_color(self, color):
         self.pen_color = color
 
-    
+    # undo redo ----------------------------------------------------------
     def push_undo_state(self):
         self.undo_stack.append(self.canvas.copy())
         if len(self.undo_stack) > self.max_history:
