@@ -27,7 +27,10 @@ class Workspace(QWidget):
         geo = self.actual_screen.availableGeometry()
 
         # canvas initializing
-        self.canvas = QImage(geo.width(), geo.height(), QImage.Format.Format_ARGB32)
+        self.canvas_width = geo.width() * 4
+        self.canvas_height = geo.height() * 4
+
+        self.canvas = QImage(self.canvas_width, self.canvas_height, QImage.Format.Format_ARGB32)
         self.canvas.fill(Qt.GlobalColor.transparent)
 
         # enable grid
@@ -247,22 +250,18 @@ class Workspace(QWidget):
 
     # on scroll zoom in/out
     def wheelEvent(self, event):
-        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            angle = event.angleDelta().y()
-            factor = 1.15 if angle > 0 else 1 / 1.15
+        angle = event.angleDelta().y()
+        factor = 1.15 if angle > 0 else 1 / 1.15
 
-            old_canvas_pos = self.to_canvas(event.position())
-            self.view_scale = max(0.2, min(self.view_scale * factor, 8))
+        old_canvas_pos = self.to_canvas(event.position())
+        self.view_scale = max(0.2, min(self.view_scale * factor, 8))
 
-            new_screen_pos = QPointF(
-                old_canvas_pos.x() * self.view_scale + self.view_offset.x(),
-                old_canvas_pos.y() * self.view_scale + self.view_offset.y(),
-            )
-            self.view_offset += event.position() - new_screen_pos
-        else:
-            self.view_offset += QPointF(event.angleDelta().x(), event.angleDelta().y())
+        new_screen_pos = QPointF(
+            old_canvas_pos.x() * self.view_scale + self.view_offset.x(),
+            old_canvas_pos.y() * self.view_scale + self.view_offset.y(),
+        )
+        self.view_offset += event.position() - new_screen_pos
 
-        self.rebuild_grid_cache()
         self.update()
 
     def paintEvent(self, event):
@@ -298,7 +297,6 @@ class Workspace(QWidget):
             painter.restore()
 
     def resizeEvent(self, event):
-        self.rebuild_grid_cache()
         super().resizeEvent(event)
 
     def set_current_tool(self, tool_name):
