@@ -5,6 +5,7 @@ from PySide6.QtCore import Qt, QPointF, QRectF
 from collections import deque
 
 from workspace.components.tool_overlay import ToolOverlay
+from workspace.components.zoom_overlay import ZoomOverlay
 
 
 class Workspace(QWidget):
@@ -41,6 +42,7 @@ class Workspace(QWidget):
         self.rebuild_grid_cache()
         
         self.tool_overlay = ToolOverlay(self)
+        self.zoom_overlay = ZoomOverlay(self)
 
         self.last_mid = None
         self.point_buffer = deque(maxlen=4)
@@ -72,7 +74,7 @@ class Workspace(QWidget):
 
     # create grid 2
     def rebuild_grid_cache(self):
-        self.grid_cache = QPixmap(self.width(), self.height())
+        self.grid_cache = QPixmap(self.canvas_width, self.canvas_height)
         self.grid_cache.fill(Qt.GlobalColor.transparent)
 
         painter = QPainter(self.grid_cache)
@@ -82,44 +84,40 @@ class Workspace(QWidget):
     #  create grid
     def draw_grid(self, painter):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
         minor_spacing = self.grid_spacing / self.grid_subdivisions
 
-        # minor grid ---
         minor_pen = QPen(QColor(150, 150, 150, 35), 1)
         minor_pen.setCosmetic(True)
         painter.setPen(minor_pen)
 
         x = 0
-        while x < self.width():
-            painter.drawLine(int(x), 0, int(x), self.height())
+        while x < self.canvas_width:
+            painter.drawLine(int(x), 0, int(x), self.canvas_height)
             x += minor_spacing
 
         y = 0
-        while y < self.height():
-            painter.drawLine(0, int(y), self.width(), int(y))
+        while y < self.canvas_height:
+            painter.drawLine(0, int(y), self.canvas_width, int(y))
             y += minor_spacing
 
-        # major grid ---
         major_pen = QPen(QColor(150, 150, 150, 80), 1)
         major_pen.setCosmetic(True)
         painter.setPen(major_pen)
 
-        for x in range(0, self.width(), self.grid_spacing):
-            painter.drawLine(x, 0, x, self.height())
-        for y in range(0, self.height(), self.grid_spacing):
-            painter.drawLine(0, y, self.width(), y)
+        for x in range(0, self.canvas_width, self.grid_spacing):
+            painter.drawLine(x, 0, x, self.canvas_height)
+        for y in range(0, self.canvas_height, self.grid_spacing):
+            painter.drawLine(0, y, self.canvas_width, y)
 
-        # axis ---
         axis_pen = QPen(QColor(120, 120, 120, 140), 1.5)
         axis_pen.setCosmetic(True)
         painter.setPen(axis_pen)
 
-        center_x = round((self.width() / 2) / self.grid_spacing) * self.grid_spacing
-        center_y = round((self.height() / 2) / self.grid_spacing) * self.grid_spacing
+        center_x = round((self.canvas_width / 2) / self.grid_spacing) * self.grid_spacing
+        center_y = round((self.canvas_height / 2) / self.grid_spacing) * self.grid_spacing
 
-        painter.drawLine(center_x, 0, center_x, self.height())
-        painter.drawLine(0, center_y, self.width(), center_y)
+        painter.drawLine(center_x, 0, center_x, self.canvas_height)
+        painter.drawLine(0, center_y, self.canvas_width, center_y)
 
     # toggle grid
     def toggle_grid(self):
@@ -252,16 +250,23 @@ class Workspace(QWidget):
     def wheelEvent(self, event):
         angle = event.angleDelta().y()
         factor = 1.15 if angle > 0 else 1 / 1.15
+        self.set_zoom(self.view_scale * factor, event.position())
 
-        old_canvas_pos = self.to_canvas(event.position())
-        self.view_scale = max(0.2, min(self.view_scale * factor, 8))
-
+    def set_zoom(self, new_scale, anchor_screen_pos = None):
+        if anchor_screen_pos is None:
+            anchor_Screen_pos = QPointF(self.width() / 2, self.height() / 2)
+    
+        old_canvas_pos = self.to_canvas(anchor_screen_pos)
+        self.view_scale = max(0.2, min(new_scale, 8))
+    
         new_screen_pos = QPointF(
             old_canvas_pos.x() * self.view_scale + self.view_offset.x(),
             old_canvas_pos.y() * self.view_scale + self.view_offset.y(),
         )
-        self.view_offset += event.position() - new_screen_pos
-
+    
+        self.view_offset += anchor_screen_pos - new_screen_pos
+    
+        self.zoom_overlay.update_percent(self.view_scale)
         self.update()
 
     def paintEvent(self, event):
@@ -294,11 +299,13 @@ class Workspace(QWidget):
                 rect = QRectF(self.shape_start, self.shape_preview_end).normalized()
                 painter.drawEllipse(rect)
 
-            painter.restore()
+        painter.restore()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
 
+    
+    # tools
     def set_current_tool(self, tool_name):
         self.current_tool = tool_name
 
