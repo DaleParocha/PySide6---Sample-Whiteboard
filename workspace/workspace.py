@@ -34,6 +34,7 @@ class Workspace(QWidget):
         self.live_layer = None          
         self.live_layer_painter = None
         self.last_live_screen_pos = None
+        self.background_image = None
 
         # Tile caching
         self.CELL_SIZE = 800   # canvas units per tile, also used as tile pixel size (1:1 baked)
@@ -374,6 +375,10 @@ class Workspace(QWidget):
         painter.translate(self.view_offset)
         painter.scale(self.view_scale, self.view_scale)
 
+        #  load canvas
+        if self.background_image is not None:
+            painter.drawImage(0, 0, self.background_image)
+
         if self.show_grid:
             self.draw_grid(painter)
 
@@ -560,24 +565,23 @@ class Workspace(QWidget):
 
     # load canvas -----------------------
     def load_canvas(self):
-        QMessageBox.information(
-            self,
-            "Load Image",
-            "Loading will place the image as a background reference; freehand strokes remain a separate layer."
-        )
         path, _ = QFileDialog.getOpenFileName(
             self,
             "Load Whiteboard",
             "",
             "PNG Files (*.png)"
         )
+
         if not path:
             return
 
         loaded = QImage(path)
         if loaded.isNull():
-            QMessageBox.warning(self, "Load Failed", "Could not open that as an image.")
+            QMessageBox.warning(self, "Load Failed", "Could not open that as an image")
             return
+        
+        self.background_image = loaded
+        self.update()
 
     # cursor preview ----------------
     def update_cursor(self):
