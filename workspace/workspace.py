@@ -460,7 +460,10 @@ class Workspace(QWidget):
             return
 
         stroke_count, shape_count = self.undo_stack.pop()
-        self.redo_stack.append((len(self.strokes), len(self.shapes)))
+
+        removed_strokes = self.strokes[stroke_count:]
+        removed_shapes = self.shapes[shape_count:]
+        self.redo_stack.append((removed_strokes, removed_shapes))
 
         del self.strokes[stroke_count:]
         del self.shapes[shape_count:]
@@ -471,9 +474,14 @@ class Workspace(QWidget):
         if not self.redo_stack:
             return
 
-        stroke_count, shape_count = self.redo_stack.pop()
+        removed_strokes, removed_shapes = self.redo_stack.pop()
+
+        # remember where to trim back to if this gets undone again
         self.undo_stack.append((len(self.strokes), len(self.shapes)))
 
+        self.strokes.extend(removed_strokes)
+        self.shapes.extend(removed_shapes)
+        self._rebuild_tiles()
         self.update()
 
     # clear ----------------
